@@ -1,4 +1,4 @@
-# Flask WebSocket 聊天室应用
+# Flask WebSocket 聊天室应用v1
 
 一个基于Flask和WebSocket的实时聊天室应用，支持用户聊天和@电影功能。
 
