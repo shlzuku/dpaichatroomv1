@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DaiP智能聊天室</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 100%;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 0;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 登录页面样式 */
+        .login-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 40px;
+        }
+
+        .login-title {
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .login-form {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .nickname-error {
+            color: #ff4757;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        /* 聊天页面样式 */
+        .chat-container {
+            display: flex;
+            height: 100%;
+            display: none;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: #f8f9fa;
+            border-right: 1px solid #e9ecef;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .online-users {
+            flex: 1;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .online-users-title {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .user-list {
+            list-style: none;
+            max-height: calc(100vh - 220px);
+            overflow: hidden;
+        }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            color: #333;
+        }
+
+        .user-status {
+            width: 8px;
+            height: 8px;
+            background: #28a745;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .logout-button {
+            margin: 20px;
+            padding: 12px;
+            background: #dc3545;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-button:hover {
+            background: #c82333;
+        }
+
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+            background: white;
+        }
+
+        .chat-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .message-nickname {
+            font-weight: 600;
+            color: #495057;
+            margin-right: 10px;
+        }
+
+        .message-time {
+            font-size: 12px;
+            color: #adb5bd;
+        }
+
+        .message-content {
+            background: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            word-wrap: break-word;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-ai {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+        }
+
+        .message-movie {
+            background: #fff8e1;
+            border-left: 4px solid #ffc107;
+        }
+
+        .movie-container {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 6px;
+        }
+
+        .movie-iframe {
+            width: 400px;
+            height: 400px;
+            border: none;
+            border-radius: 4px;
+        }
+
+        .chat-input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .input-controls {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .emoji-button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        .emoji-button:hover {
+            background-color: #f0f0f0;
+        }
+
+        .emoji-picker {
+            position: absolute;
+            bottom: 100%;
+            left: 20px;
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            display: none;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 5px;
+            max-height: 200px;
+            overflow-y: hidden;
+            z-index: 1000;
+        }
+        
+        .emoji-item {
+            cursor: pointer;
+            padding: 5px;
+            text-align: center;
+            border-radius: 4px;
+            user-select: none;
+            transition: background-color 0.2s;
+        }
+        
+        .emoji-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .emoji-item {
+            font-size: 20px;
+            text-align: center;
+            padding: 5px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        .emoji-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 10px;
+            position: relative;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 16px;
+            resize: none;
+            max-height: 120px;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .send-button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .chat-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: 200px;
+            }
+            
+            .user-list {
+                max-height: 100px;
+                overflow-y: hidden;
+            }
+
+            .login-title {
+                font-size: 2rem;
+            }
+        }
+        
+        /* 确保没有其他区域出现滚动条 */
+        * {
+            scrollbar-width: none;
+        }
+        
+        *::-webkit-scrollbar {
+            display: none;
+        }
+        
+        /* 仅为聊天消息区域启用滚动条 */
+        .chat-messages {
+            scrollbar-width: auto;
+        }
+        
+        .chat-messages::-webkit-scrollbar {
+            display: block;
+            width: 6px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 登录页面 -->
+        <div class="login-container" id="login-container">
+            <h1 class="login-title">DaiP智能聊天室</h1>
+            <form class="login-form" id="login-form">
+                <div class="form-group">
+                    <label for="nickname">昵称</label>
+                    <input type="text" id="nickname" placeholder="请输入您的昵称" required>
+                    <div class="nickname-error" id="nickname-error">该昵称已被使用</div>
+                </div>
+                <div class="form-group">
+                    <label for="server">服务器地址</label>
+                    <select id="server" required>
+                        {% for server in servers %}
+                        <option value="{{ server.url }}">{{ server.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="login-button">登录</button>
+            </form>
+        </div>
+
+        <!-- 聊天页面 -->
+        <div class="chat-container" id="chat-container">
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <h3 class="sidebar-title">聊天室</h3>
+                </div>
+                <div class="online-users">
+                    <div class="online-users-title">在线用户</div>
+                    <ul class="user-list" id="user-list"></ul>
+                </div>
+                <button class="logout-button" id="logout-button">退出</button>
+            </div>
+            <div class="chat-main">
+                <div class="chat-header">
+                    <h2 class="chat-title">DaiP智能聊天室</h2>
+                </div>
+                <div class="chat-messages" id="chat-messages"></div>
+                <div class="chat-input-area">
+                    <div class="input-controls">
+                        <button class="emoji-button" id="emoji-button">😀</button>
+                        <div class="emoji-picker" id="emoji-picker"></div>
+                    </div>
+                    <div class="input-wrapper">
+                        <textarea class="chat-input" id="chat-input" placeholder="输入消息..."></textarea>
+                        <button class="send-button" id="send-button">发送</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    <script>
+        let socket;
+        let currentNickname = '';
+
+        // 格式化时间
+        function formatTime() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
+
+        // 检查昵称是否可用
+        document.getElementById('nickname').addEventListener('blur', async function() {
+            const nickname = this.value.trim();
+            if (nickname) {
+                const response = await fetch('/check_nickname', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ nickname })
+                });
+                const data = await response.json();
+                const errorElement = document.getElementById('nickname-error');
+                errorElement.style.display = data.valid ? 'none' : 'block';
+            }
+        });
+
+        // 登录表单提交
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const nickname = document.getElementById('nickname').value.trim();
+            const server = document.getElementById('server').value;
+            
+            // 再次验证昵称
+            const response = await fetch('/check_nickname', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ nickname })
+            });
+            const data = await response.json();
+            
+            if (!data.valid) {
+                document.getElementById('nickname-error').style.display = 'block';
+                return;
+            }
+
+            currentNickname = nickname;
+            
+            // 连接WebSocket
+            const socketProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const socketUrl = `${socketProtocol}//${window.location.host}`;
+            socket = io(socketUrl, {
+                reconnectionAttempts: 5,
+                reconnectionDelay: 1000,
+                timeout: 20000
+            });
+            
+            // WebSocket事件监听
+            socket.on('connect_error', (error) => {
+                console.error('WebSocket连接错误:', error);
+                addMessage({
+                    nickname: '系统',
+                    message: '连接服务器失败，请检查网络连接',
+                    timestamp: formatTime()
+                });
+            });
+            
+            socket.on('reconnect', (attemptNumber) => {
+                console.log('重连成功，尝试次数:', attemptNumber);
+                addMessage({
+                    nickname: '系统',
+                    message: '已重新连接到服务器',
+                    timestamp: formatTime()
+                });
+            });
+            
+            socket.on('disconnect', (reason) => {
+                console.log('断开连接，原因:', reason);
+                if (reason === 'io server disconnect') {
+                    // 服务器主动断开连接，尝试重连
+                    socket.connect();
+                }
+            });
+            
+            // 设置事件监听器
+            setupSocketListeners();
+            
+            // 显示聊天界面
+            document.getElementById('login-container').style.display = 'none';
+            document.getElementById('chat-container').style.display = 'flex';
+            
+            // 登录到聊天室
+            socket.emit('login', { nickname });
+        });
+
+        // 设置WebSocket事件处理器函数
+        function setupSocketListeners() {
+            if (!socket) return;
+            
+            // 用户加入
+            socket.on('user_joined', function(data) {
+                updateUserList(data.users);
+                
+                if (data.nickname !== currentNickname) {
+                    addMessage({
+                        nickname: '系统',
+                        message: `${data.nickname} 加入了聊天室`,
+                        timestamp: formatTime()
+                    });
+                }
+            });
+
+            // 用户离开
+            socket.on('user_left', function(data) {
+                updateUserList(data.users);
+                addMessage({
+                    nickname: '系统',
+                    message: `${data.nickname} 离开了聊天室`,
+                    timestamp: formatTime()
+                });
+            });
+
+            // 接收历史消息
+            socket.on('chat_history', function(data) {
+                const messagesContainer = document.getElementById('chat-messages');
+                messagesContainer.innerHTML = '';
+                data.history.forEach(msg => addMessage(msg));
+            });
+
+            // 接收新消息
+            socket.on('new_message', function(data) {
+                addMessage(data);
+            });
+        }
+
+        // 更新用户列表
+        function updateUserList(users) {
+            const userList = document.getElementById('user-list');
+            userList.innerHTML = '';
+            users.forEach(user => {
+                const li = document.createElement('li');
+                li.className = 'user-item';
+                li.innerHTML = `
+                    <span class="user-status"></span>
+                    <span>${user}${user === currentNickname ? ' (我)' : ''}</span>
+                `;
+                userList.appendChild(li);
+            });
+        }
+
+        // 添加消息到聊天区域
+        function addMessage(data) {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+            
+            let contentClass = 'message-content';
+            if (data.type === 'ai') {
+                contentClass += ' message-ai';
+            } else if (data.type === 'movie') {
+                contentClass += ' message-movie';
+            }
+            
+            let messageHTML = `
+                <div class="message-header">
+                    <span class="message-nickname">${data.nickname}</span>
+                    <span class="message-time">${data.timestamp}</span>
+                </div>
+                <div class="${contentClass}">${data.message}</div>
+            `;
+            
+            // 添加特殊内容
+            if (data.type === 'ai' && data.command_data) {
+                messageHTML += `
+                    <div class="${contentClass} message-ai">
+                        <strong>AI回复:</strong> ${data.command_data.response}
+                    </div>
+                `;
+            } else if (data.type === 'movie' && data.command_data) {
+                messageHTML += `
+                    <div class="movie-container">
+                        <iframe class="movie-iframe" src="${data.command_data.url}" allowfullscreen></iframe>
+                    </div>
+                `;
+            }
+            
+            messageDiv.innerHTML = messageHTML;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // 初始化Emoji选择器
+        function initEmojiPicker() {
+            const emojiPicker = document.getElementById('emoji-picker');
+            emojiPicker.innerHTML = ''; // 清空现有内容
+            
+            // Emoji数据 - 确保使用原生emoji表情
+            const emojis = [
+                // 笑脸表情
+                '😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣',
+                '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰',
+                '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜',
+                '🤪', '🤨', '🧐', '🤓', '😎', '🤩', '🥳', '😏',
+                // 负面表情
+                '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣',
+                '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠',
+                '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨',
+                '😰', '😥', '😓', '🤗', '🤔', '🤭', '🤫', '🤥',
+                // 手势表情
+                '👍', '👎', '👌', '✌️', '🤞', '🤟', '🤘', '🤙',
+                '👈', '👉', '👆', '👇', '☝️', '🖐️', '✋', '🖖',
+                '👏', '🙌', '👐', '🤲', '🙏', '💪', '❤️', '🧡',
+                '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💕',
+                // 动物表情
+                '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼',
+                '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔',
+                // 物品表情
+                '🎈', '🎉', '🎁', '🎂', '🎀', '⭐', '🌟', '✨',
+                '🔥', '💯', '💔', '🎊', '🎵', '🎶', '🎸', '🎤'
+            ];
+            
+            // 使用简化的方式创建emoji项
+            emojis.forEach(emoji => {
+                const emojiItem = document.createElement('div');
+                emojiItem.className = 'emoji-item';
+                emojiItem.innerHTML = emoji;
+                // 简单直接的点击事件绑定
+                emojiItem.onclick = function() {
+                    console.log('点击了表情:', emoji); // 调试信息
+                    const input = document.getElementById('chat-input');
+                    if (input) {
+                        // 直接将表情添加到输入框末尾
+                        input.value += emoji;
+                        input.focus();
+                    }
+                    // 关闭表情面板
+                    emojiPicker.style.display = 'none';
+                };
+                emojiPicker.appendChild(emojiItem);
+            });
+            
+            // 切换Emoji面板显示/隐藏 - 使用简单的方式
+            const emojiButton = document.getElementById('emoji-button');
+            emojiButton.innerHTML = '😀'; // 确保使用原生emoji
+            emojiButton.onclick = function(e) {
+                e.stopPropagation(); // 防止事件冒泡
+                emojiPicker.style.display = emojiPicker.style.display === 'grid' ? 'none' : 'grid';
+                console.log('表情面板切换:', emojiPicker.style.display); // 调试信息
+            };
+            
+            // 点击页面其他地方关闭Emoji面板
+            document.onclick = function() {
+                if (emojiPicker.style.display !== 'none') {
+                    emojiPicker.style.display = 'none';
+                }
+            };
+            
+            // 防止点击Emoji面板时关闭
+            emojiPicker.onclick = function(e) {
+                e.stopPropagation();
+            };
+            
+            // 防止点击emoji按钮时关闭
+            emojiButton.onclick = function(e) {
+                e.stopPropagation();
+                emojiPicker.style.display = emojiPicker.style.display === 'grid' ? 'none' : 'grid';
+            };
+        }
+        
+        // 简化版插入Emoji到输入框 - 备用函数
+        function insertEmoji(emoji) {
+            const input = document.getElementById('chat-input');
+            if (input) {
+                input.value += emoji;
+                input.focus();
+                // 关闭表情面板
+                const emojiPicker = document.getElementById('emoji-picker');
+                if (emojiPicker) {
+                    emojiPicker.style.display = 'none';
+                }
+            }
+        }
+        
+        // 发送消息
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            
+            if (message && socket) {
+                const timestamp = formatTime();
+                
+                // 检查是否是@电影命令
+                if (message.startsWith('@电影 ')) {
+                    const url = message.substring(3).trim();
+                    if (url) {
+                        // 直接发送原始消息，由服务器处理解析
+                        socket.emit('send_message', {
+                            nickname: currentNickname,
+                            message: message, // 保持原始消息格式
+                            timestamp: timestamp
+                        });
+                        input.value = '';
+                        return;
+                    }
+                }
+                
+                // 普通消息
+                socket.emit('send_message', {
+                    nickname: currentNickname,
+                    message: message,
+                    timestamp: timestamp
+                });
+                input.value = '';
+            }
+        }
+
+        document.getElementById('send-button').addEventListener('click', sendMessage);
+        document.getElementById('chat-input').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // 退出登录
+        document.getElementById('logout-button').addEventListener('click', function() {
+            if (socket && currentNickname) {
+                socket.emit('logout', { nickname: currentNickname });
+                socket.disconnect();
+            }
+            document.getElementById('chat-container').style.display = 'none';
+            document.getElementById('login-container').style.display = 'flex';
+            document.getElementById('nickname').value = '';
+            currentNickname = '';
+        });
+        
+        // 页面加载完成后初始化Emoji选择器
+        document.addEventListener('DOMContentLoaded', function() {
+            initEmojiPicker();
+        });
+    </script>
+</body>
+</html>
